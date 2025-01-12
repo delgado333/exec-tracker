@@ -1,66 +1,15 @@
-document.addEventListener('DOMContentLoaded', function() {
-    const app = document.getElementById('root');
-    app.innerHTML = `
-        <div class="p-6 max-w-4xl mx-auto">
-            <div class="bg-white shadow-lg rounded-lg p-6 mb-6">
-                <h1 class="text-2xl font-bold mb-4">Executive Outreach Tracker</h1>
-                
-                <!-- Input Form -->
-                <div class="space-y-4 mb-6">
-                    <input type="text" id="execName" placeholder="Executive Name" 
-                        class="w-full p-2 border rounded">
-                    <input type="text" id="company" placeholder="Company" 
-                        class="w-full p-2 border rounded">
-                    <input type="text" id="title" placeholder="Title" 
-                        class="w-full p-2 border rounded">
-                    <div class="flex gap-4">
-                        <input type="date" id="dateSent" 
-                            class="w-1/2 p-2 border rounded">
-                        <button onclick="addExecutive()" 
-                            class="w-1/2 bg-blue-500 text-white p-2 rounded hover:bg-blue-600">
-                            Add Executive
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- List Container -->
-            <div id="executiveList" class="space-y-4"></div>
-
-            <!-- Dashboard -->
-            <div class="bg-white shadow-lg rounded-lg p-6 mt-6">
-                <h2 class="text-xl font-bold mb-4">Dashboard</h2>
-                <div class="grid grid-cols-3 gap-4">
-                    <div class="bg-gray-50 p-4 rounded-lg text-center">
-                        <div id="totalCount" class="text-2xl font-bold">0</div>
-                        <div class="text-gray-600">Total Outreach</div>
-                    </div>
-                    <div class="bg-gray-50 p-4 rounded-lg text-center">
-                        <div id="responseCount" class="text-2xl font-bold">0</div>
-                        <div class="text-gray-600">Responses</div>
-                    </div>
-                    <div class="bg-gray-50 p-4 rounded-lg text-center">
-                        <div id="responseRate" class="text-2xl font-bold">0%</div>
-                        <div class="text-gray-600">Response Rate</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    `;
-
-    loadExecutives();
-});
-
-// Data storage in localStorage
 let executives = JSON.parse(localStorage.getItem('executives')) || [];
 
-function addExecutive() {
+window.addExecutive = function() {
     const name = document.getElementById('execName').value;
     const company = document.getElementById('company').value;
     const title = document.getElementById('title').value;
     const dateSent = document.getElementById('dateSent').value;
 
-    if (!name || !company) return;
+    if (!name || !company) {
+        alert('Please enter at least a name and company');
+        return;
+    }
 
     const executive = {
         id: Date.now(),
@@ -72,32 +21,29 @@ function addExecutive() {
     };
 
     executives.push(executive);
-    saveAndReload();
+    localStorage.setItem('executives', JSON.stringify(executives));
+    loadExecutives();
     clearForm();
-}
+};
 
-function updateStatus(id, status) {
+window.updateStatus = function(id, status) {
     executives = executives.map(exec => 
         exec.id === id ? {...exec, status} : exec
     );
-    saveAndReload();
-}
-
-function deleteExecutive(id) {
-    executives = executives.filter(exec => exec.id !== id);
-    saveAndReload();
-}
-
-function saveAndReload() {
     localStorage.setItem('executives', JSON.stringify(executives));
     loadExecutives();
-    updateDashboard();
-}
+};
+
+window.deleteExecutive = function(id) {
+    executives = executives.filter(exec => exec.id !== id);
+    localStorage.setItem('executives', JSON.stringify(executives));
+    loadExecutives();
+};
 
 function loadExecutives() {
     const container = document.getElementById('executiveList');
-    container.innerHTML = executives.map(exec => `
-        <div class="bg-white shadow-lg rounded-lg p-4">
+    const executivesHtml = executives.map(exec => `
+        <div class="bg-white shadow-lg rounded-lg p-4 mb-4">
             <div class="flex justify-between items-start">
                 <div>
                     <h3 class="font-bold">${exec.name}</h3>
@@ -123,6 +69,7 @@ function loadExecutives() {
         </div>
     `).join('');
     
+    container.innerHTML = executivesHtml;
     updateDashboard();
 }
 
@@ -142,3 +89,53 @@ function clearForm() {
     document.getElementById('title').value = '';
     document.getElementById('dateSent').value = '';
 }
+
+document.addEventListener('DOMContentLoaded', function() {
+    const app = document.getElementById('root');
+    app.innerHTML = `
+        <div class="p-6 max-w-4xl mx-auto">
+            <div class="bg-white shadow-lg rounded-lg p-6 mb-6">
+                <h1 class="text-2xl font-bold mb-4">Executive Outreach Tracker</h1>
+                
+                <div class="space-y-4 mb-6">
+                    <input type="text" id="execName" placeholder="Executive Name" 
+                        class="w-full p-2 border rounded">
+                    <input type="text" id="company" placeholder="Company" 
+                        class="w-full p-2 border rounded">
+                    <input type="text" id="title" placeholder="Title" 
+                        class="w-full p-2 border rounded">
+                    <div class="flex gap-4">
+                        <input type="date" id="dateSent" 
+                            class="w-1/2 p-2 border rounded">
+                        <button onclick="addExecutive()" 
+                            class="w-1/2 bg-blue-500 text-white p-2 rounded hover:bg-blue-600">
+                            Add Executive
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="executiveList" class="space-y-4"></div>
+
+            <div class="bg-white shadow-lg rounded-lg p-6 mt-6">
+                <h2 class="text-xl font-bold mb-4">Dashboard</h2>
+                <div class="grid grid-cols-3 gap-4">
+                    <div class="bg-gray-50 p-4 rounded-lg text-center">
+                        <div id="totalCount" class="text-2xl font-bold">0</div>
+                        <div class="text-gray-600">Total Outreach</div>
+                    </div>
+                    <div class="bg-gray-50 p-4 rounded-lg text-center">
+                        <div id="responseCount" class="text-2xl font-bold">0</div>
+                        <div class="text-gray-600">Responses</div>
+                    </div>
+                    <div class="bg-gray-50 p-4 rounded-lg text-center">
+                        <div id="responseRate" class="text-2xl font-bold">0%</div>
+                        <div class="text-gray-600">Response Rate</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+
+    loadExecutives();
+});
